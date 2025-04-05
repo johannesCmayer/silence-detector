@@ -20,6 +20,10 @@
 
 (setv sound-path-nice-beep "./nice_beep.mp3")
 
+(defmacro when-main [#* body]
+  `(when (= __name__ "__main__")
+     (do ~@body)))
+
 (defn get-device-count [pyaudio-instance]
   (get (.get_host_api_info_by_index pyaudio-instance 0)
        "deviceCount"))
@@ -85,15 +89,13 @@ average speech activation."
                                                       "-bg" "green"
                                                       "-fg" "black"
                                                       "-xs" (str monitor-idx)]
-                                                     :stdin PIPE
-                                                     :stdout PIPE
-                                                     :stderr PIPE)]
+                                                     :stdin PIPE)]
                                      (.communicate proc :input banner-msg)))))
                      (range 1 5))]
     (for [thread threads]
       (.start thread))))
 
-(defn main []
+(defn reward-for-speaking-loop []
   (let [context (initialize-context)
         last-beep-time (time)]
     (while True
@@ -107,9 +109,12 @@ average speech activation."
           (dzen2-reward-banner))))
     (cleanup context)))
 
-(defmacro when-main [#* body]
-  `(when (= __name__ "__main__")
-     (do ~@body)))
+;; TODO
+;; - make flake provide executable
+;; - make flake proivde system service
+;; - make flake provide configuration options
+;; - install service in nix and disable previous service
+;; - delete all unneeded files in repo
 
 (when-main
-  (main))
+  (reward-for-speaking-loop))

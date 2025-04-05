@@ -1,1 +1,0 @@
-{:deps {org.babashka/cli {:mvn/version "0.8.62"}}}
