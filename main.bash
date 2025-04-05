@@ -14,6 +14,8 @@ nice_sound="$SOURCE_DIR/nice_beep.opus"
 buzzer="$SOURCE_DIR/wrong_buzzer.mp3"
 swoosh="$SOURCE_DIR/swoosh.mp3"
 
+silence_threshold=0.06
+
 check_file_exists "$buzzer" "$swoosh" "$nice_sound"
 
 soft_fail () {
@@ -44,7 +46,7 @@ while true; do
     silence_result=$(sox test.wav -n stat 2>&1 | grep 'Maximum amplitude' | awk '{print $3}')
 
     # Determine if silence was detected (near-zero amplitude)
-    if (( $(echo "$silence_result < 0.03" | bc -l) )); then
+    if (( $(echo "$silence_result < $silence_threshold" | bc -l) )); then
         echo "The $record_interval second long recoding contanis only silence." >/dev/null
         if [ "$1" = "strong" ]; then
             strong_fail
