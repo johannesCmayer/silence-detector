@@ -13,7 +13,26 @@
     {
       devShells = forEachSupportedSystem ({ pkgs }: {
         default = pkgs.mkShell {
-          packages = with pkgs; [ bash sox bc nix mpv dzen2 gawk bb];
+          packages = with pkgs; [
+            bash
+            sox
+            bc
+            nix
+            mpv
+            dzen2
+            gawk
+            bb
+
+            python3
+            python312Packages.pymicro-vad
+            python312Packages.pyaudio
+
+            ffmpeg
+
+            hy
+            python312Packages.hy
+            python312Packages.hyrule
+          ];
         };
       });
     };
