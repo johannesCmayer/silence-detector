@@ -38,19 +38,27 @@
         # - Somehow have the ExecStart be the program in this repo
         let
           inherit (lib) mkIf mkEnableOption;
+          cfg = config.services.vocal-reward;
         in
         {
-          options.vocal-reward.enable = mkEnableOption
-            "Enable the vocal reward user daemon.";
+          options.services.vocal-reward.enable = mkEnableOption
+            "the vocal-reward user daemon";
 
           config = mkIf config.vocal-reward.enable {
-            systemd.user.services.vocal-reward = {
-              description = "Service to give reward for speaking.";
-              path = [ pkgs.libnotify ];
+            systemd.user.services.test-service = {
+              enable = true;
+              description = "Update Locate Database";
               script = ''
-                notify-send "hello from systemd"
+                echo hello > /home/johannes/foo/boop.txt
               '';
             };
+            # systemd.user.services.vocal-reward = {
+            #   description = "Service to give reward for speaking.";
+            #   path = [ pkgs.libnotify ];
+            #   script = ''
+            #     notify-send "hello from systemd"
+            #   '';
+            # };
           };
         };
     };
