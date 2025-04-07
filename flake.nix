@@ -44,7 +44,7 @@
           options.services.vocal-reward.enable = mkEnableOption
             "the vocal-reward user daemon";
 
-          config = mkIf config.vocal-reward.enable {
+          config = mkIf config.services.vocal-reward.enable {
             systemd.user.services.vocal-reward = {
               enable = true;
               description = "Update Locate Database";
