@@ -109,12 +109,12 @@ average speech activation."
           (dzen2-reward-banner))))
     (cleanup context)))
 
+(when-main
+  (reward-for-speaking-loop))
+
 ;; TODO
 ;; - make flake provide executable
 ;; - make flake proivde system service
 ;; - make flake provide configuration options
 ;; - install service in nix and disable previous service
-;; - delete all unneeded files in repo
-
-(when-main
-  (reward-for-speaking-loop))
+;; - [X] delete all unneeded files in repo

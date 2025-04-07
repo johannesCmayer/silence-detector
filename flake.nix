@@ -5,7 +5,7 @@
 
   outputs = { self, nixpkgs }:
     let
-      supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      supportedSystems = [ "x86_64-linux" "aarch64-linux" ];
       forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
         pkgs = import nixpkgs { inherit system; };
       });
@@ -27,5 +27,32 @@
           ];
         };
       });
+
+      packages = forEachSupportedSystem ({ pkgs }: {
+        default = pkgs.dzen2;
+      });
+
+      nixosModules.default = { config, lib, pkgs, ... }:
+        # TODO
+        # - Figure out how to test the current configuration quickly
+        # - Somehow have the ExecStart be the program in this repo
+        let
+          inherit (lib) mkIf mkEnableOption;
+        in
+        {
+          options.vocal-reward.enable = mkEnableOption
+            "Enable the vocal reward user daemon.";
+
+          config = mkIf config.vocal-reward.enable {
+            systemd.user.services.vocal-reward = {
+              description = "Service to give reward for speaking.";
+              path = [ pkgs.libnotify ];
+              script = ''
+                notify-send "hello from systemd"
+              '';
+            };
+          };
+        };
     };
 }
+
