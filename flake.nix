@@ -48,9 +48,9 @@
             systemd.user.services.test-service = {
               enable = true;
               description = "Update Locate Database";
-              script = ''
-                echo hello > /home/johannes/foo/boop.txt
-              '';
+              serviceConfig = {
+                ExecStart = "echo";
+              };
             };
             # systemd.user.services.vocal-reward = {
             #   description = "Service to give reward for speaking.";
