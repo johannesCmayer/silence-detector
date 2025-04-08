@@ -1,6 +1,3 @@
-(require hyrule [-> comment]
-         :readers [%])
-(import hyrule [inc])
 (import functools [reduce])
 (import pymicro_vad [MicroVad])
 (import pyaudio)
@@ -18,7 +15,13 @@
   min-time-between-rewards 1.5
   banner-display-duration 1)
 
-(setv sound-path-nice-beep "./nice_beep.mp3")
+;; We as a hack pass the path to the sound file when build with nix as an environment variable
+(setv sound-path-nice-beep (if (in "nice_beep" os.environ)
+                               (get os.environ "nice_beep")
+                               "./nice_beep.mp3"))
+
+(print (os.getcwd))
+(print sound-path-nice-beep)
 
 (defmacro when-main [#* body]
   `(when (= __name__ "__main__")
@@ -100,7 +103,7 @@ average speech activation."
         last-beep-time (time)]
     (while True
       (let [speech-activity (detect-speech context)]
-        (let [activity (int (max 0
+        #_(let [activity (int (max 0
                                  (- (* speech-activity 10000)
                                     9900)))]
           (print f"{(.ljust (str speech-activity) 22)} || {(* activity "=")}{(* (- 100 activity) " ")}||"))

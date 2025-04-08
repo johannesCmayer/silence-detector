@@ -33,6 +33,9 @@
           name = "vocal-reward";
           system = "x86_64-linux";
           main = ./main.hy;
+          PYTHONPATH = "${pkgs.python312Packages.pymicro-vad}/lib/python3.12/site-packages:${pkgs.python312Packages.pyaudio}/lib/python3.12/site-packages";
+          PATH = "${pkgs.dzen2}/bin:${pkgs.ffmpeg}/bin";
+          nice_beep = ./nice_beep.mp3;
           hyExecutable = "${pkgs.hy}/bin/hy";
           builder = "${pkgs.hy}/bin/hy";
           args = [ ./build.hy ];
@@ -60,9 +63,9 @@
 
           config = mkIf cfg.enable {
             systemd.user.services.vocal-reward = {
-              description = "Update Locate Database";
+              description = "Run the vocal-reward daemon.";
               serviceConfig = {
-                ExecStart = "${self.packages.vocal-reward}";
+                ExecStart = "${self.packages."x86_64-linux".vocal-reward}/bin/vocal-reward";
               };
             };
             # systemd.user.services.vocal-reward = {
