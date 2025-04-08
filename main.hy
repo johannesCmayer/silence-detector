@@ -14,7 +14,7 @@
   CHANNELS 1
   RATE 16000
   RECORD-SECONDS 0.010
-  speech-threshold 0.85
+  speech-threshold 0.999
   min-time-between-rewards 1.5
   banner-display-duration 1)
 
@@ -100,6 +100,10 @@ average speech activation."
         last-beep-time (time)]
     (while True
       (let [speech-activity (detect-speech context)]
+        (let [activity (int (max 0
+                                 (- (* speech-activity 10000)
+                                    9900)))]
+          (print f"{(.ljust (str speech-activity) 22)} || {(* activity "=")}{(* (- 100 activity) " ")}||"))
         (when (and (> speech-activity
                       speech-threshold)
                    (> (- (time) last-beep-time)

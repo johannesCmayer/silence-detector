@@ -28,14 +28,28 @@
         };
       });
 
-      packages = forEachSupportedSystem ({ pkgs }: {
-        default = pkgs.dzen2;
+      packages = forEachSupportedSystem ({ pkgs }: rec {
+        vocal-reward = derivation {
+          name = "vocal-reward";
+          system = "x86_64-linux";
+          main = ./main.hy;
+          hyExecutable = "${pkgs.hy}/bin/hy";
+          builder = "${pkgs.hy}/bin/hy";
+          args = [ ./build.hy ];
+        };
+        default = vocal-reward;
       });
 
       nixosModules.default = { config, lib, pkgs, ... }:
         # TODO
-        # - Figure out how to test the current configuration quickly
-        # - Somehow have the ExecStart be the program in this repo
+        # - Figure out how to test the current configuration quickly (without
+        #   needing to create a git commit).
+        #   - Maybe buy using a the path type (use files in director instead of
+        #     specific git commit, and don't lock flake.lock)
+        # - Implement the actual vocal-reward service
+        #   - Create a package (or maybe app is better?)
+        #   - Create correct service configuration
+        #     - How to have a service use the package bin (or run app)?
         let
           inherit (lib) mkIf mkEnableOption;
           cfg = config.services.vocal-reward;
@@ -48,7 +62,7 @@
             systemd.user.services.vocal-reward = {
               description = "Update Locate Database";
               serviceConfig = {
-                ExecStart = "echo";
+                ExecStart = "${self.packages.vocal-reward}";
               };
             };
             # systemd.user.services.vocal-reward = {
@@ -62,4 +76,3 @@
         };
     };
 }
-
