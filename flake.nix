@@ -66,6 +66,10 @@
               description = "Run the vocal-reward daemon.";
               serviceConfig = {
                 ExecStart = "${self.packages."x86_64-linux".vocal-reward}/bin/vocal-reward";
+                Restart = "always";
+                RestartSec = "1s";
+                RestartSteps = 5;
+                RestartMaxDelaySec = "60s";
               };
             };
             # systemd.user.services.vocal-reward = {
