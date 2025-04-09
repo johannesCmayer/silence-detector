@@ -4,6 +4,7 @@
 (import time [time])
 (import subprocess [Popen PIPE TimeoutExpired])
 (import threading [Thread])
+(import os)
 
 (setv
   CHUNK 160
@@ -11,7 +12,7 @@
   CHANNELS 1
   RATE 16000
   RECORD-SECONDS 0.010
-  speech-threshold 0.999
+  speech-threshold 0.995
   min-time-between-rewards 1.5
   banner-display-duration 1)
 
@@ -99,22 +100,24 @@ average speech activation."
       (.start thread))))
 
 (defn reward-for-speaking-loop []
-  (let [context (initialize-context)
-        last-beep-time (time)]
-    (while True
-      (let [speech-activity (detect-speech context)]
-        #_(let [activity (int (max 0
-                                 (- (* speech-activity 10000)
-                                    9900)))]
-          (print f"{(.ljust (str speech-activity) 22)} || {(* activity "=")}{(* (- 100 activity) " ")}||"))
-        (when (and (> speech-activity
-                      speech-threshold)
-                   (> (- (time) last-beep-time)
-                      min-time-between-rewards))
-          (setv last-beep-time (time))
-          (play-audio sound-path-nice-beep)
-          (dzen2-reward-banner))))
-    (cleanup context)))
+  (while True
+    (print "reinit")
+    (let [context (initialize-context)
+          last-beep-time (time)]
+      (for [_ (range 1000)]
+        (let [speech-activity (detect-speech context)]
+          #_(let [activity (int (max 0
+                                     (- (* speech-activity 10000)
+                                        9900)))]
+              (print f"{(.ljust (str speech-activity) 22)} || {(* activity "=")}{(* (- 100 activity) " ")}||"))
+          (when (and (> speech-activity
+                        speech-threshold)
+                     (> (- (time) last-beep-time)
+                        min-time-between-rewards))
+            (setv last-beep-time (time))
+            (play-audio sound-path-nice-beep)
+            (dzen2-reward-banner))))
+      (cleanup context))))
 
 (when-main
   (reward-for-speaking-loop))
