@@ -72,52 +72,42 @@ average speech activation."
     (.Process10ms (get context :vad) audio)))
 
 (defn play-audio [path]
-  (Popen ["ffplay" "-loglevel" "error" "-autoexit" "-nodisp" path]))
+  (Popen ["mpv" "--no-video" path] :stdout PIPE :stderr PIPE))
 
-(setv banner-msg (.encode
-                   (+ (str.join " " (* 1000 ["IA"]))
-                      "\n")))
+(setv banner-msg (+ (str.join " " (* 400 ["IA"])) "\n"))
 
 (defn dzen2-reward-banner []
   ;; We first create and then spawn the threads because python is slow.
-  (let [threads (map (fn [monitor-idx]
-                       (Thread
-                         :daemon True
-                         :target (fn []
-                                   (let [proc (Popen ["dzen2"
-                                                      "-p" (str banner-display-duration)
-                                                      "-ta" "l"
-                                                      "-sa" "c"
-                                                      "-w" "10000"
-                                                      "-h" "20"
-                                                      "-bg" "green"
-                                                      "-fg" "black"
-                                                      "-xs" (str monitor-idx)]
-                                                     :stdin PIPE)]
-                                     (.communicate proc :input banner-msg)))))
-                     (range 1 5))]
-    (for [thread threads]
-      (.start thread))))
+  (for [monitor-idx (range 1 5)]
+    (let [proc (Popen [f"echo '{banner-msg}' | \
+                         dzen2 \
+                         -p {(str banner-display-duration)} \
+                         -ta l \
+                         -sa c \
+                         -w 10000 \
+                         -h 20 \
+                         -bg green \
+                         -fg black \
+                         -xs {monitor-idx}"]
+                      :shell True)])))
 
 (defn reward-for-speaking-loop []
-  (while True
-    (print "reinit")
-    (let [context (initialize-context)
-          last-beep-time (time)]
-      (for [_ (range 1000)]
-        (let [speech-activity (detect-speech context)]
-          #_(let [activity (int (max 0
-                                     (- (* speech-activity 10000)
-                                        9900)))]
-              (print f"{(.ljust (str speech-activity) 22)} || {(* activity "=")}{(* (- 100 activity) " ")}||"))
-          (when (and (> speech-activity
-                        speech-threshold)
-                     (> (- (time) last-beep-time)
-                        min-time-between-rewards))
-            (setv last-beep-time (time))
-            (play-audio sound-path-nice-beep)
-            (dzen2-reward-banner))))
-      (cleanup context))))
+  (let [context (initialize-context)
+        last-beep-time (time)]
+    (while True
+      (let [speech-activity (detect-speech context)]
+        #_(let [activity (int (max 0
+                                   (- (* speech-activity 10000)
+                                      9900)))]
+            (print f"{(.ljust (str speech-activity) 22)} || {(* activity "=")}{(* (- 100 activity) " ")}||"))
+        (when (and (> speech-activity
+                      speech-threshold)
+                   (> (- (time) last-beep-time)
+                      min-time-between-rewards))
+          (setv last-beep-time (time))
+          (play-audio sound-path-nice-beep)
+          (dzen2-reward-banner))))
+    (cleanup context)))
 
 (when-main
   (reward-for-speaking-loop))
