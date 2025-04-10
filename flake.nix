@@ -15,7 +15,7 @@
         default = pkgs.mkShell {
           packages = with pkgs; [
             dzen2
-            ffmpeg
+            mpv
 
             python3
             python312Packages.pymicro-vad
@@ -34,7 +34,7 @@
           system = "x86_64-linux";
           main = ./main.hy;
           PYTHONPATH = "${pkgs.python312Packages.pymicro-vad}/lib/python3.12/site-packages:${pkgs.python312Packages.pyaudio}/lib/python3.12/site-packages";
-          PATH = "${pkgs.dzen2}/bin:${pkgs.ffmpeg}/bin";
+          PATH = "${pkgs.dzen2}/bin:${pkgs.mpv}/bin";
           nice_beep = ./nice_beep.mp3;
           hyExecutable = "${pkgs.hy}/bin/hy";
           builder = "${pkgs.hy}/bin/hy";
